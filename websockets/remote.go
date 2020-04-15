@@ -301,7 +301,7 @@ func (r *Remote) StreamLedgerData(ledger interface{}) chan data.LedgerEntrySlice
 func (r *Remote) Ledger(ledger interface{}, transactions bool) (*LedgerResult, error) {
 	cmd := &LedgerCommand{
 		Command:      newCommand("ledger"),
-		LedgerIndex:  ledger,
+		Ledger:       ledger,
 		Transactions: transactions,
 		Expand:       true,
 	}

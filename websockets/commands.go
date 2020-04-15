@@ -140,7 +140,7 @@ type SubmitResult struct {
 
 type LedgerCommand struct {
 	*Command
-	LedgerIndex  interface{}   `json:"ledger_index"`
+	Ledger       interface{}   `json:"ledger"`
 	Accounts     bool          `json:"accounts"`
 	Transactions bool          `json:"transactions"`
 	Expand       bool          `json:"expand"`
