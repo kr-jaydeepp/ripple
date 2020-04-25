@@ -28,17 +28,22 @@ const (
 
 	// Time allowed to connect to server.
 	dialTimeout = 5 * time.Second
+
+	// time gap between reconnection
+	connReconnectInterval = 30 * time.Second
 )
 
 type Remote struct {
 	Incoming chan interface{}
 	outgoing chan Syncer
 	ws       *websocket.Conn
+	url      *url.URL
+	reConn   bool
 }
 
 // NewRemote returns a new remote session connected to the specified
 // server endpoint URI. To close the connection, use Close().
-func NewRemote(endpoint string) (*Remote, error) {
+func NewRemote(endpoint string, enableReconnection bool) (*Remote, error) {
 	glog.Infoln(endpoint)
 	u, err := url.Parse(endpoint)
 	if err != nil {
@@ -56,10 +61,48 @@ func NewRemote(endpoint string) (*Remote, error) {
 		Incoming: make(chan interface{}, 1000),
 		outgoing: make(chan Syncer, 10),
 		ws:       ws,
+		url:      u,
+		reConn:   enableReconnection,
 	}
 
 	go r.run()
 	return r, nil
+}
+
+// reConnect try to reconnect to server in case connection gets disconnected
+func (r *Remote) reConnect() {
+	ticker := time.NewTicker(connReconnectInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case command, ok := <-r.outgoing:
+			if !ok {
+				glog.Errorln("outgoing channel closed")
+				return
+			}
+			command.Fail("Connection Closed")
+
+		// Time to reconnect
+		case <-ticker.C:
+			glog.Info("reConnect: Trying to reconnect")
+
+			c, err := net.DialTimeout("tcp", r.url.Host, dialTimeout)
+			if err != nil {
+				glog.Error("reConnect: DailTimeout Error: ", err)
+				continue
+			}
+			ws, _, err := websocket.NewClient(c, r.url, nil, 1024, 1024)
+			if err != nil {
+				glog.Error("reConnect: NewClient Error: ", err)
+				continue
+			}
+			r.ws = ws
+			go r.run()
+			glog.Info("reConnect: successfull")
+			break
+		}
+	}
 }
 
 // Close shuts down the Remote session and blocks until all internal
@@ -92,6 +135,9 @@ func (r *Remote) run() {
 		// Drain the inbound channel and block until it is closed,
 		// indicating that the readPump has returned.
 		for _ = range inbound {
+		}
+		if r.reConn {
+			go r.reConnect()
 		}
 	}()
 
