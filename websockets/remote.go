@@ -71,6 +71,7 @@ func NewRemote(endpoint string, enableReconnection bool) (*Remote, error) {
 
 // reConnect try to reconnect to server in case connection gets disconnected
 func (r *Remote) reConnect() {
+	glog.Info("reConnect!")
 	ticker := time.NewTicker(connReconnectInterval)
 	defer ticker.Stop()
 
@@ -126,6 +127,7 @@ func (r *Remote) run() {
 	timeoutCancellers := make(map[uint64]chan struct{})
 
 	defer func() {
+		glog.Info("run terminating")
 		close(outbound) // Shuts down the writePump
 		close(r.Incoming)
 
@@ -138,6 +140,8 @@ func (r *Remote) run() {
 		// indicating that the readPump has returned.
 		for _ = range inbound {
 		}
+
+		glog.Info("reConn: ", r.reConn)
 		if r.reConn {
 			go r.reConnect()
 		}
@@ -174,7 +178,9 @@ func (r *Remote) run() {
 					timer.Stop()
 					return
 				case <-timer.C:
+					glog.Info("sending timeout")
 					timeout <- id
+					glog.Info("send timeout")
 					return
 				}
 			}()
@@ -197,7 +203,9 @@ func (r *Remote) run() {
 					glog.Errorln(err.Error(), string(in))
 					continue
 				}
+				glog.Info("recieved subscribe msg")
 				r.Incoming <- cmd
+				glog.Info("send subscribe msg")
 				continue
 			}
 
@@ -587,6 +595,7 @@ func (r *Remote) Fee() (*FeeResult, error) {
 // readPump reads from the websocket and sends to inbound channel.
 // Expects to receive PONGs at specified interval, or logs an error and returns.
 func (r *Remote) readPump(inbound chan<- []byte) {
+	defer glog.Info("readPump terminating")
 	r.ws.SetReadDeadline(time.Now().Add(pongWait))
 	r.ws.SetPongHandler(func(string) error { r.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
@@ -605,6 +614,7 @@ func (r *Remote) readPump(inbound chan<- []byte) {
 // Also sends PING messages at the specified interval.
 // Returns when outbound channel is closed, or an error is encountered.
 func (r *Remote) writePump(outbound <-chan interface{}) {
+	defer glog.Info("writePump terminating")
 	ticker := time.NewTicker(pingPeriod)
 	defer ticker.Stop()
 
