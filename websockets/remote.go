@@ -122,6 +122,8 @@ func (r *Remote) run() {
 	outbound := make(chan interface{})
 	inbound := make(chan []byte)
 	pending := make(map[uint64]Syncer)
+	timeout := make(chan uint64)
+	timeoutCancellers := make(map[uint64]chan struct{})
 
 	defer func() {
 		close(outbound) // Shuts down the writePump
@@ -163,6 +165,20 @@ func (r *Remote) run() {
 			id := reflect.ValueOf(command).Elem().FieldByName("Id").Uint()
 			pending[id] = command
 
+			canceller := make(chan struct{})
+			timeoutCancellers[id] = canceller
+			go func() {
+				timer := time.NewTimer(time.Minute)
+				select {
+				case <-canceller:
+					timer.Stop()
+					return
+				case <-timer.C:
+					timeout <- id
+					return
+				}
+			}()
+
 		case in, ok := <-inbound:
 			if !ok {
 				glog.Errorln("Connection closed by server")
@@ -192,11 +208,24 @@ func (r *Remote) run() {
 				continue
 			}
 			delete(pending, response.Id)
+			if canceller, exists := timeoutCancellers[response.Id]; exists {
+				canceller <- struct{}{}
+				delete(timeoutCancellers, response.Id)
+			}
 			if err := json.Unmarshal(in, &cmd); err != nil {
 				glog.Errorln(err.Error())
 				continue
 			}
 			cmd.Done()
+
+		case id := <-timeout:
+			if cmd, exists := pending[id]; exists {
+				// this command has timed out
+				delete(pending, id)
+				cmd.Fail("command timed out")
+			}
+
+			delete(timeoutCancellers, id)
 		}
 	}
 }
