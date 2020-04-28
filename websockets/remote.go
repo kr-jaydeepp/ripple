@@ -39,6 +39,7 @@ type Remote struct {
 	ws       *websocket.Conn
 	url      *url.URL
 	reConn   bool
+	shutdown bool
 }
 
 // NewRemote returns a new remote session connected to the specified
@@ -111,6 +112,8 @@ connectLoop:
 // goroutines have been cleaned up.
 // Any commands that are pending a response will return with an error.
 func (r *Remote) Close() {
+	glog.Info("closing remote connection")
+	r.shutdown = true
 	close(r.outgoing)
 
 	// Drain the Incoming channel and block until it is closed,
@@ -140,8 +143,10 @@ func (r *Remote) run() {
 		for _ = range inbound {
 		}
 
-		if r.reConn {
+		if r.reConn && !r.shutdown {
 			go r.reConnect()
+		} else {
+			close(r.Incoming)
 		}
 	}()
 
