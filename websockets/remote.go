@@ -31,6 +31,9 @@ const (
 
 	// time gap between reconnection
 	connReconnectInterval = 30 * time.Second
+
+	// server disconnect error message
+	ServerDisconnectErrorMsg = "Client Error -1 ws: server disconnected"
 )
 
 type Remote struct {
@@ -84,7 +87,7 @@ connectLoop:
 				glog.Errorln("outgoing channel closed")
 				return
 			}
-			command.Fail("Connection Closed")
+			command.Fail("ws: server disconnected")
 
 		// Time to reconnect
 		case <-ticker.C:
@@ -135,7 +138,7 @@ func (r *Remote) run() {
 
 		// Cancel all pending commands with an error
 		for _, c := range pending {
-			c.Fail("Connection Closed")
+			c.Fail("ws: server disconnected")
 		}
 
 		// Drain the inbound channel and block until it is closed,
