@@ -224,6 +224,7 @@ func (r *Remote) run() {
 			}
 			if err := json.Unmarshal(in, &cmd); err != nil {
 				glog.Errorln(err.Error())
+				cmd.Fail("error occured while unmarshalling")
 				continue
 			}
 			cmd.Done()
