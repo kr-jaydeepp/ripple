@@ -41,6 +41,7 @@ const (
 	CHECK_CASH      TransactionType = 17
 	CHECK_CANCEL    TransactionType = 18
 	TRUST_SET       TransactionType = 20
+	ACCOUNT_DELETE  TransactionType = 21
 	AMENDMENT       TransactionType = 100
 	SET_FEE         TransactionType = 101
 )
@@ -84,6 +85,7 @@ var TxFactory = [...]func() Transaction{
 	CHECK_CREATE:    func() Transaction { return &CheckCreate{TxBase: TxBase{TransactionType: CHECK_CREATE}} },
 	CHECK_CASH:      func() Transaction { return &CheckCash{TxBase: TxBase{TransactionType: CHECK_CASH}} },
 	CHECK_CANCEL:    func() Transaction { return &CheckCancel{TxBase: TxBase{TransactionType: CHECK_CANCEL}} },
+	ACCOUNT_DELETE:  func() Transaction { return &AccountDelete{TxBase: TxBase{TransactionType: ACCOUNT_DELETE}} },
 }
 
 var ledgerEntryNames = [...]string{
@@ -137,6 +139,7 @@ var txNames = [...]string{
 	CHECK_CREATE:    "CheckCreate",
 	CHECK_CASH:      "CheckCash",
 	CHECK_CANCEL:    "CheckCancel",
+	ACCOUNT_DELETE:  "AccountDelete",
 }
 
 var txTypes = map[string]TransactionType{
@@ -158,6 +161,7 @@ var txTypes = map[string]TransactionType{
 	"CheckCreate":          CHECK_CREATE,
 	"CheckCash":            CHECK_CASH,
 	"CheckCancel":          CHECK_CANCEL,
+	"AccountDelete":        ACCOUNT_DELETE,
 }
 
 var HashableTypes []string

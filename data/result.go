@@ -60,6 +60,8 @@ const (
 	tecEXPIRED
 	tecDUPLICATE
 	tecKILLED
+	tecHAS_OBLIGATIONS
+	tecTOO_SOON
 )
 
 const (
@@ -160,6 +162,7 @@ const (
 	tefNOT_MULTI_SIGNING
 	tefBAD_AUTH_MASTER
 	tefINVARIANT_FAILED
+	tefTOO_BIG
 )
 const (
 	// -99 .. -1: R Retry (sequence too high, no funds for txn fee, originating account non-existent)
@@ -304,6 +307,10 @@ var resultNames = map[TransactionResult]struct {
 	terPRE_SEQ:     {"terPRE_SEQ", "Missing/inapplicable prior transaction."},
 	terOWNERS:      {"terOWNERS", "Non-zero owner count."},
 	terQUEUED:      {"terQUEUED", "Held until escalated fee drops."},
+
+	tecHAS_OBLIGATIONS: {"tecHAS_OBLIGATIONS", "Account to be deleted is connected to objects that cannot be deleted in the ledger."},
+	tecTOO_SOON:        {"tecTOO_SOON", "Occurs if the sender's Sequence number is too high."},
+	tefTOO_BIG:         {"tefTOO_BIG", "Occurs if the sending account is linked to more than 1000 objects in the ledger."},
 }
 
 var reverseResults map[string]TransactionResult
