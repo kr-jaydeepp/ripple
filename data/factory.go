@@ -23,27 +23,28 @@ const (
 	DEPOSIT_PRE_AUTH LedgerEntryType = 0x70 // 'p'
 
 	// TransactionType values come from rippled's "TxFormats.h"
-	PAYMENT         TransactionType = 0
-	ESCROW_CREATE   TransactionType = 1
-	ESCROW_FINISH   TransactionType = 2
-	ACCOUNT_SET     TransactionType = 3
-	ESCROW_CANCEL   TransactionType = 4
-	SET_REGULAR_KEY TransactionType = 5
-	OFFER_CREATE    TransactionType = 7
-	OFFER_CANCEL    TransactionType = 8
-	TICKET_CREATE   TransactionType = 10
-	TICKET_CANCEL   TransactionType = 11
-	SIGNER_LIST_SET TransactionType = 12
-	PAYCHAN_CREATE  TransactionType = 13
-	PAYCHAN_FUND    TransactionType = 14
-	PAYCHAN_CLAIM   TransactionType = 15
-	CHECK_CREATE    TransactionType = 16
-	CHECK_CASH      TransactionType = 17
-	CHECK_CANCEL    TransactionType = 18
-	TRUST_SET       TransactionType = 20
-	ACCOUNT_DELETE  TransactionType = 21
-	AMENDMENT       TransactionType = 100
-	SET_FEE         TransactionType = 101
+	PAYMENT             TransactionType = 0
+	ESCROW_CREATE       TransactionType = 1
+	ESCROW_FINISH       TransactionType = 2
+	ACCOUNT_SET         TransactionType = 3
+	ESCROW_CANCEL       TransactionType = 4
+	SET_REGULAR_KEY     TransactionType = 5
+	OFFER_CREATE        TransactionType = 7
+	OFFER_CANCEL        TransactionType = 8
+	TICKET_CREATE       TransactionType = 10
+	TICKET_CANCEL       TransactionType = 11
+	SIGNER_LIST_SET     TransactionType = 12
+	PAYCHAN_CREATE      TransactionType = 13
+	PAYCHAN_FUND        TransactionType = 14
+	PAYCHAN_CLAIM       TransactionType = 15
+	CHECK_CREATE        TransactionType = 16
+	CHECK_CASH          TransactionType = 17
+	CHECK_CANCEL        TransactionType = 18
+	DEPOSIT_PRE_AUTH_TX TransactionType = 19
+	TRUST_SET           TransactionType = 20
+	ACCOUNT_DELETE      TransactionType = 21
+	AMENDMENT           TransactionType = 100
+	SET_FEE             TransactionType = 101
 )
 
 var LedgerFactory = [...]func() Hashable{
@@ -67,25 +68,26 @@ var LedgerEntryFactory = [...]func() LedgerEntry{
 }
 
 var TxFactory = [...]func() Transaction{
-	PAYMENT:         func() Transaction { return &Payment{TxBase: TxBase{TransactionType: PAYMENT}} },
-	ACCOUNT_SET:     func() Transaction { return &AccountSet{TxBase: TxBase{TransactionType: ACCOUNT_SET}} },
-	SET_REGULAR_KEY: func() Transaction { return &SetRegularKey{TxBase: TxBase{TransactionType: SET_REGULAR_KEY}} },
-	OFFER_CREATE:    func() Transaction { return &OfferCreate{TxBase: TxBase{TransactionType: OFFER_CREATE}} },
-	OFFER_CANCEL:    func() Transaction { return &OfferCancel{TxBase: TxBase{TransactionType: OFFER_CANCEL}} },
-	TRUST_SET:       func() Transaction { return &TrustSet{TxBase: TxBase{TransactionType: TRUST_SET}} },
-	AMENDMENT:       func() Transaction { return &Amendment{TxBase: TxBase{TransactionType: AMENDMENT}} },
-	SET_FEE:         func() Transaction { return &SetFee{TxBase: TxBase{TransactionType: SET_FEE}} },
-	ESCROW_CREATE:   func() Transaction { return &EscrowCreate{TxBase: TxBase{TransactionType: ESCROW_CREATE}} },
-	ESCROW_FINISH:   func() Transaction { return &EscrowFinish{TxBase: TxBase{TransactionType: ESCROW_FINISH}} },
-	ESCROW_CANCEL:   func() Transaction { return &EscrowCancel{TxBase: TxBase{TransactionType: ESCROW_CANCEL}} },
-	SIGNER_LIST_SET: func() Transaction { return &SignerListSet{TxBase: TxBase{TransactionType: SIGNER_LIST_SET}} },
-	PAYCHAN_CREATE:  func() Transaction { return &PaymentChannelCreate{TxBase: TxBase{TransactionType: PAYCHAN_CREATE}} },
-	PAYCHAN_FUND:    func() Transaction { return &PaymentChannelFund{TxBase: TxBase{TransactionType: PAYCHAN_FUND}} },
-	PAYCHAN_CLAIM:   func() Transaction { return &PaymentChannelClaim{TxBase: TxBase{TransactionType: PAYCHAN_CLAIM}} },
-	CHECK_CREATE:    func() Transaction { return &CheckCreate{TxBase: TxBase{TransactionType: CHECK_CREATE}} },
-	CHECK_CASH:      func() Transaction { return &CheckCash{TxBase: TxBase{TransactionType: CHECK_CASH}} },
-	CHECK_CANCEL:    func() Transaction { return &CheckCancel{TxBase: TxBase{TransactionType: CHECK_CANCEL}} },
-	ACCOUNT_DELETE:  func() Transaction { return &AccountDelete{TxBase: TxBase{TransactionType: ACCOUNT_DELETE}} },
+	PAYMENT:             func() Transaction { return &Payment{TxBase: TxBase{TransactionType: PAYMENT}} },
+	ACCOUNT_SET:         func() Transaction { return &AccountSet{TxBase: TxBase{TransactionType: ACCOUNT_SET}} },
+	SET_REGULAR_KEY:     func() Transaction { return &SetRegularKey{TxBase: TxBase{TransactionType: SET_REGULAR_KEY}} },
+	OFFER_CREATE:        func() Transaction { return &OfferCreate{TxBase: TxBase{TransactionType: OFFER_CREATE}} },
+	OFFER_CANCEL:        func() Transaction { return &OfferCancel{TxBase: TxBase{TransactionType: OFFER_CANCEL}} },
+	TRUST_SET:           func() Transaction { return &TrustSet{TxBase: TxBase{TransactionType: TRUST_SET}} },
+	AMENDMENT:           func() Transaction { return &Amendment{TxBase: TxBase{TransactionType: AMENDMENT}} },
+	SET_FEE:             func() Transaction { return &SetFee{TxBase: TxBase{TransactionType: SET_FEE}} },
+	ESCROW_CREATE:       func() Transaction { return &EscrowCreate{TxBase: TxBase{TransactionType: ESCROW_CREATE}} },
+	ESCROW_FINISH:       func() Transaction { return &EscrowFinish{TxBase: TxBase{TransactionType: ESCROW_FINISH}} },
+	ESCROW_CANCEL:       func() Transaction { return &EscrowCancel{TxBase: TxBase{TransactionType: ESCROW_CANCEL}} },
+	SIGNER_LIST_SET:     func() Transaction { return &SignerListSet{TxBase: TxBase{TransactionType: SIGNER_LIST_SET}} },
+	PAYCHAN_CREATE:      func() Transaction { return &PaymentChannelCreate{TxBase: TxBase{TransactionType: PAYCHAN_CREATE}} },
+	PAYCHAN_FUND:        func() Transaction { return &PaymentChannelFund{TxBase: TxBase{TransactionType: PAYCHAN_FUND}} },
+	PAYCHAN_CLAIM:       func() Transaction { return &PaymentChannelClaim{TxBase: TxBase{TransactionType: PAYCHAN_CLAIM}} },
+	CHECK_CREATE:        func() Transaction { return &CheckCreate{TxBase: TxBase{TransactionType: CHECK_CREATE}} },
+	CHECK_CASH:          func() Transaction { return &CheckCash{TxBase: TxBase{TransactionType: CHECK_CASH}} },
+	CHECK_CANCEL:        func() Transaction { return &CheckCancel{TxBase: TxBase{TransactionType: CHECK_CANCEL}} },
+	ACCOUNT_DELETE:      func() Transaction { return &AccountDelete{TxBase: TxBase{TransactionType: ACCOUNT_DELETE}} },
+	DEPOSIT_PRE_AUTH_TX: func() Transaction { return &DepositPreAuthTx{TxBase: TxBase{TransactionType: DEPOSIT_PRE_AUTH_TX}} },
 }
 
 var ledgerEntryNames = [...]string{
@@ -101,7 +103,7 @@ var ledgerEntryNames = [...]string{
 	TICKET:           "Ticket",
 	PAY_CHANNEL:      "PayChannel",
 	CHECK:            "Check",
-	DEPOSIT_PRE_AUTH: "DepositPreAuth",
+	DEPOSIT_PRE_AUTH: "DepositPreauth",
 }
 
 var ledgerEntryTypes = map[string]LedgerEntryType{
@@ -117,29 +119,30 @@ var ledgerEntryTypes = map[string]LedgerEntryType{
 	"Ticket":         TICKET,
 	"PayChannel":     PAY_CHANNEL,
 	"Check":          CHECK,
-	"DepositPreAuth": DEPOSIT_PRE_AUTH,
+	"DepositPreauth": DEPOSIT_PRE_AUTH,
 }
 
 var txNames = [...]string{
-	PAYMENT:         "Payment",
-	ACCOUNT_SET:     "AccountSet",
-	SET_REGULAR_KEY: "SetRegularKey",
-	OFFER_CREATE:    "OfferCreate",
-	OFFER_CANCEL:    "OfferCancel",
-	TRUST_SET:       "TrustSet",
-	AMENDMENT:       "EnableAmendment",
-	SET_FEE:         "SetFee",
-	ESCROW_CREATE:   "EscrowCreate",
-	ESCROW_FINISH:   "EscrowFinish",
-	ESCROW_CANCEL:   "EscrowCancel",
-	SIGNER_LIST_SET: "SignerListSet",
-	PAYCHAN_CREATE:  "PaymentChannelCreate",
-	PAYCHAN_FUND:    "PaymentChannelFund",
-	PAYCHAN_CLAIM:   "PaymentChannelClaim",
-	CHECK_CREATE:    "CheckCreate",
-	CHECK_CASH:      "CheckCash",
-	CHECK_CANCEL:    "CheckCancel",
-	ACCOUNT_DELETE:  "AccountDelete",
+	PAYMENT:             "Payment",
+	ACCOUNT_SET:         "AccountSet",
+	SET_REGULAR_KEY:     "SetRegularKey",
+	OFFER_CREATE:        "OfferCreate",
+	OFFER_CANCEL:        "OfferCancel",
+	TRUST_SET:           "TrustSet",
+	AMENDMENT:           "EnableAmendment",
+	SET_FEE:             "SetFee",
+	ESCROW_CREATE:       "EscrowCreate",
+	ESCROW_FINISH:       "EscrowFinish",
+	ESCROW_CANCEL:       "EscrowCancel",
+	SIGNER_LIST_SET:     "SignerListSet",
+	PAYCHAN_CREATE:      "PaymentChannelCreate",
+	PAYCHAN_FUND:        "PaymentChannelFund",
+	PAYCHAN_CLAIM:       "PaymentChannelClaim",
+	CHECK_CREATE:        "CheckCreate",
+	CHECK_CASH:          "CheckCash",
+	CHECK_CANCEL:        "CheckCancel",
+	ACCOUNT_DELETE:      "AccountDelete",
+	DEPOSIT_PRE_AUTH_TX: "DepositPreauth",
 }
 
 var txTypes = map[string]TransactionType{
@@ -162,6 +165,7 @@ var txTypes = map[string]TransactionType{
 	"CheckCash":            CHECK_CASH,
 	"CheckCancel":          CHECK_CANCEL,
 	"AccountDelete":        ACCOUNT_DELETE,
+	"DepositPreauth":       DEPOSIT_PRE_AUTH_TX,
 }
 
 var HashableTypes []string
