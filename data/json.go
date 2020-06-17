@@ -78,6 +78,11 @@ func (txm *TransactionWithMetaData) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("Not a valid transaction with metadata: Missing TransactionType")
 	}
 	txType := txTypeMatch[1]
+
+	if !isSupportedTx(txType) {
+		// handle unsupported tx here
+		return nil
+	}
 	txm.Transaction = GetTxFactoryByType(txType)()
 	if err := json.Unmarshal(b, txm.Transaction); err != nil {
 		return err

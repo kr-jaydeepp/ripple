@@ -196,3 +196,10 @@ func GetTxFactoryByType(txType string) func() Transaction {
 func GetLedgerEntryFactoryByType(leType string) func() LedgerEntry {
 	return LedgerEntryFactory[ledgerEntryTypes[leType]]
 }
+
+func isSupportedTx(txType string) bool {
+	if _, exists := txTypes[txType]; !exists {
+		return false
+	}
+	return true
+}
