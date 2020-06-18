@@ -6,11 +6,16 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/golang/glog"
 )
+
+var errTxTypeNotSupported = errors.New("tx type is not supported")
 
 type ledgerJSON Ledger
 
@@ -152,6 +157,35 @@ func (s TransactionSlice) MarshalJSON() ([]byte, error) {
 		raw[i] = json.RawMessage(extra)
 	}
 	return json.Marshal(raw)
+}
+
+// UnmarshalJSON over-rides the default unmarshalling so that when
+// unknown transaction types are encountered, instead of throwing an error
+// we simply skip such transactions
+func (s *TransactionSlice) UnmarshalJSON(b []byte) error {
+	var jsonSlice []json.RawMessage
+	err := json.Unmarshal(b, &jsonSlice)
+	if err != nil {
+		return err
+	}
+
+	*s = make([]*TransactionWithMetaData, 0, len(jsonSlice))
+
+	for _, jObj := range jsonSlice {
+		var txm TransactionWithMetaData
+		err = json.Unmarshal(jObj, &txm)
+		if err != nil {
+			if err == errTxTypeNotSupported {
+				continue
+			}
+
+			return err
+		}
+
+		*s = append(*s, txm)
+	}
+
+	return nil
 }
 
 var (
@@ -305,7 +339,8 @@ func (t *TransactionType) UnmarshalText(b []byte) error {
 		return nil
 	}
 	// If here, add tx type to TxFactory and TxTypes in factory.go
-	return fmt.Errorf("Unknown TransactionType: %s", string(b))
+	glog.Errorf("ripple: Unknown TransactionType: %s", string(b))
+	return errTxTypeNotSupported
 }
 
 func (t RippleTime) MarshalJSON() ([]byte, error) {
