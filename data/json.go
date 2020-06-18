@@ -182,7 +182,7 @@ func (s *TransactionSlice) UnmarshalJSON(b []byte) error {
 			return err
 		}
 
-		*s = append(*s, txm)
+		*s = append(*s, &txm)
 	}
 
 	return nil
