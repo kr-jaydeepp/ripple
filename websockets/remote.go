@@ -132,6 +132,7 @@ func (r *Remote) run() {
 	pending := make(map[uint64]Syncer)
 	timeout := make(chan uint64)
 	timeoutCancellers := make(map[uint64]chan struct{})
+	writePumpStopped := make(chan struct{})
 
 	defer func() {
 		close(outbound) // Shuts down the writePump
@@ -143,7 +144,7 @@ func (r *Remote) run() {
 
 		// Drain the inbound channel and block until it is closed,
 		// indicating that the readPump has returned.
-		for _ = range inbound {
+		for range inbound {
 		}
 
 		if r.reConn && !r.shutdown {
@@ -156,12 +157,25 @@ func (r *Remote) run() {
 	// Spawn read/write goroutines
 	go func() {
 		defer r.ws.Close()
+		defer close(writePumpStopped)
 		r.writePump(outbound)
 	}()
 	go func() {
 		defer close(inbound)
 		r.readPump(inbound)
 	}()
+
+	commandTimeoutFunc := func(commandID uint64, timeoutCanceller chan struct{}) {
+		timer := time.NewTimer(time.Minute)
+		select {
+		case <-timeoutCanceller:
+			timer.Stop()
+			return
+		case <-timer.C:
+			timeout <- commandID
+			return
+		}
+	}
 
 	// Main run loop
 	var response Command
@@ -171,23 +185,22 @@ func (r *Remote) run() {
 			if !ok {
 				return
 			}
-			outbound <- command
+
+			// add the command to "pending" so that it doesn't get stuck if writepump has stopped
 			id := reflect.ValueOf(command).Elem().FieldByName("Id").Uint()
 			pending[id] = command
 
+			// add cancellation before sending the command info
 			canceller := make(chan struct{})
 			timeoutCancellers[id] = canceller
-			go func() {
-				timer := time.NewTimer(time.Minute)
-				select {
-				case <-canceller:
-					timer.Stop()
-					return
-				case <-timer.C:
-					timeout <- id
-					return
-				}
-			}()
+
+			select {
+			case <-writePumpStopped:
+				delete(timeoutCancellers, id) // never actually sent the command
+				return
+			case outbound <- command:
+				go commandTimeoutFunc(id, canceller)
+			}
 
 		case in, ok := <-inbound:
 			if !ok {
